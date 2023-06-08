@@ -50,6 +50,8 @@ namespace CarInsurance.Controllers
         {
             if (ModelState.IsValid)
             {
+                // Calculate the quote
+                CalculateQuote(insuree);
                 db.Insurees.Add(insuree);
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -195,21 +197,28 @@ namespace CarInsurance.Controllers
         }
 
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Admin([Bind(Include = "Id,FirstName,LastName,EmailAddress")] Insuree insuree)
+        public ActionResult Admin()
         {
-            if (ModelState.IsValid)
-            {
-                CalculateQuote(insuree); // Calculate the quote and update the Insuree object
+            // Retrieve all entries from the database
+            var insurees = db.Insurees.ToList();
 
-                db.Insurees.Add(insuree);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+            // Create a dictionary to store the quotes
+            var quotes = new Dictionary<int, decimal>();
+
+            // Calculate the quote for each entry and store it in the dictionary
+            foreach (var insuree in insurees)
+            {
+                CalculateQuote(insuree);
+                quotes.Add(insuree.Id, ViewBag.MonthlyQuote);
             }
 
-            return View(insuree);
+            // Pass the list of entries and quotes to the view
+            ViewBag.Insurees = insurees;
+            ViewBag.Quotes = quotes;
+
+            return View();
         }
+
 
 
 
