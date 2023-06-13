@@ -126,33 +126,33 @@ namespace CarInsurance.Controllers
             base.Dispose(disposing);
         }
 
-        // Action method for calculating the quote
-        public ActionResult CalculateQuote(Insuree insuree)
+        public decimal CalculateQuote(Insuree insuree)
         {
             decimal monthlyTotal = 50; // Base monthly total
 
             // Age calculations
             DateTime now = DateTime.Today;
-            DateTime dateOfBirth = DateTime.Parse(insuree.DateOfBirth);
-            int age = now.Year - dateOfBirth.Year;
-            if (now < dateOfBirth.AddYears(age))
+            DateTime dateOfBirth;
+            if (DateTime.TryParse(insuree.DateOfBirth, out dateOfBirth))
             {
-                age--; // Decrease age if the birthday hasn't occurred yet this year
-            }
+                int age = now.Year - dateOfBirth.Year;
+                if (now < dateOfBirth.AddYears(age))
+                {
+                    age--; // Decrease age if the birthday hasn't occurred yet this year
+                }
 
-            if (age <= 18)
-            {
-                monthlyTotal += 100;
-            }
-
-            else if (age >= 19 && age <= 25)
-            {
-                monthlyTotal += 50;
-            }
-
-            else
-            {
-                monthlyTotal += 25;
+                if (age <= 18)
+                {
+                    monthlyTotal += 100;
+                }
+                else if (age >= 19 && age <= 25)
+                {
+                    monthlyTotal += 50;
+                }
+                else
+                {
+                    monthlyTotal += 25;
+                }
             }
 
             // Car year calculations
@@ -191,33 +191,35 @@ namespace CarInsurance.Controllers
                 monthlyTotal += monthlyTotal * 0.5m;
             }
 
-            // Return the calculated quote to the view
-            ViewBag.MonthlyQuote = monthlyTotal;
-            return View();
+            return monthlyTotal;
         }
+
 
 
         public ActionResult Admin()
         {
-            // Retrieve all entries from the database
-            var insurees = db.Insurees.ToList();
+            List<Insuree> insurees = new List<Insuree>();
 
-            // Create a dictionary to store the quotes
-            var quotes = new Dictionary<int, decimal>();
-
-            // Calculate the quote for each entry and store it in the dictionary
-            foreach (var insuree in insurees)
+            foreach (var item in db.Insurees)
             {
-                CalculateQuote(insuree);
-                quotes.Add(insuree.Id, ViewBag.MonthlyQuote);
+                Insuree insuree = new Insuree
+                {
+                    FirstName = item.FirstName,
+                    LastName = item.LastName,
+                    EmailAddress = item.EmailAddress,
+                    Quote = CalculateQuote(item)
+                };
+
+                insurees.Add(insuree);
             }
 
-            // Pass the list of entries and quotes to the view
-            ViewBag.Insurees = insurees;
-            ViewBag.Quotes = quotes;
-
-            return View();
+            return View(insurees);
         }
+
+
+
+
+
 
 
 

@@ -11,7 +11,8 @@ namespace CarInsurance.Models
 {
     using System;
     using System.Collections.Generic;
-    
+    using System.ComponentModel.DataAnnotations;
+
     public partial class Insuree
     {
         public int Id { get; set; }
@@ -25,6 +26,10 @@ namespace CarInsurance.Models
         public bool DUI_ { get; set; }
         public int SpeedingTIckets { get; set; }
         public bool CoverageType { get; set; }
+
+
+        [DisplayFormat(DataFormatString = "{0:C}")]
         public decimal Quote { get; set; }
+
     }
 }
