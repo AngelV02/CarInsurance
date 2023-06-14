@@ -17,7 +17,14 @@ namespace CarInsurance.Controllers
         // GET: Insuree
         public ActionResult Index()
         {
-            return View(db.Insurees.ToList());
+            var insurees = db.Insurees.ToList();
+
+            foreach (var item in insurees)
+            {
+                item.Quote = CalculateQuote(item);
+            }
+
+            return View(insurees);
         }
 
         // GET: Insuree/Details/5
@@ -50,8 +57,8 @@ namespace CarInsurance.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Calculate the quote
-                CalculateQuote(insuree);
+                // Assign the calculated quote value
+                insuree.Quote = CalculateQuote(insuree);
                 db.Insurees.Add(insuree);
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -198,29 +205,15 @@ namespace CarInsurance.Controllers
 
         public ActionResult Admin()
         {
-            List<Insuree> insurees = new List<Insuree>();
+            var insurees = db.Insurees.ToList();
 
-            foreach (var item in db.Insurees)
+            foreach (var item in insurees)
             {
-                Insuree insuree = new Insuree
-                {
-                    FirstName = item.FirstName,
-                    LastName = item.LastName,
-                    EmailAddress = item.EmailAddress,
-                    Quote = CalculateQuote(item)
-                };
-
-                insurees.Add(insuree);
+                item.Quote = CalculateQuote(item);
             }
 
             return View(insurees);
         }
-
-
-
-
-
-
 
 
 
